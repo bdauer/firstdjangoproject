@@ -66,10 +66,7 @@ target/
 .DS_Store
 
 *.db
-email_settings.py
 
 # pickle
 
 *.p
-
-settings.py

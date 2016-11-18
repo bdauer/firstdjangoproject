@@ -1,6 +1,6 @@
 ## [part 1: creating a project, views, url redirects, http request/response](https://docs.djangoproject.com/en/1.10/intro/tutorial01/)
 
-### Creating a Project
+### creating a project
 
     django-admin startproject mysite
 
@@ -17,7 +17,7 @@ creates a directory tree for the **project**:
             wsgi.py
 
 
-### `Manage.py`
+### `manage.py`
 
 use `manage.py` to do stuff e.g.
 
@@ -70,3 +70,5 @@ and should import the views file so that it can generate the correct views:
 The **regex** here specifies the ending of the slug. The second argument passes an httpRequest object to the index view. The name kwarg makes index available as a shorter variable.
 
 Back in the project's `urls.py`, `admin.site.urls` is used to access the admin console app.
+
+## part 2: database setup, intro to models, intro to admin panel

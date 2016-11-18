@@ -1,4 +1,4 @@
-## [Part 1](https://docs.djangoproject.com/en/1.10/intro/tutorial01/)
+## [part 1: creating a project, views, url redirects, http request/response](https://docs.djangoproject.com/en/1.10/intro/tutorial01/)
 
 ### Creating a Project
 

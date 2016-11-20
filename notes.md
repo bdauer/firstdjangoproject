@@ -5,13 +5,12 @@ Table of Contents:
     * [manage.py](#manage)
     * [views.py](#views)
     * [urls.py](#urls)
-
 * [Part 2](#part2): Databases
     * [settings.py and db setup](#settings)
     * [models.py and migrations](#models)
     * [database queries](#queries)
     * [admin panel and db management](#dbadmin)
-
+* [Part 3](#part3) Views in Depth
 
 
 ## <a name="part1"></a> [part 1: creating a project, views, url redirects, http request/response](https://docs.djangoproject.com/en/1.10/intro/tutorial01/)
@@ -33,7 +32,7 @@ creates a directory tree for the **project**:
             wsgi.py
 
 
-### <a name="manage"></a>  [`manage.py`](https://docs.djangoproject.com/en/1.10/ref/django-admin/)
+### <a name="manage"></a> [`manage.py`](https://docs.djangoproject.com/en/1.10/ref/django-admin/)
 
 use `manage.py` to manage your project (and its database):
 
@@ -56,7 +55,7 @@ then **pass the request object** to the view and return a response:
     def index(request):
         return HttpResponse("Hello, world. You're at the polls index.")
 
-### <a name="urls"></a> `urls.py`: the URLconf module
+### <a name="urls"></a> [`urls.py](https://docs.djangoproject.com/en/1.10/ref/urlresolvers/#module-django.urls)`: the URLconf module`
 
 URL redirects live in the **project** directory's `urls.py`:
 
@@ -68,7 +67,7 @@ URL redirects live in the **project** directory's `urls.py`:
         url(r'^admin/', admin.site.urls),
     ]
 
-The first **regex** specifies to look for `<www.somedomain.com>/polls/`
+The first **regex** specifies to look for `<www.somedomain.com>/polls/`. Once the main URLconf file is pointed at the app's location, any additional views in the app's URLconf will be seen by the project.
 
 
 The second argument's `include()` function says: 'look at some other URLconf'. In this case, check `mysite/polls/urls.py`. It should also import url:
@@ -77,13 +76,12 @@ The second argument's `include()` function says: 'look at some other URLconf'. I
 
 and should import the views file so that it can generate the correct views:
 
-
     from . import views
 
     urlpatterns = [
         url(r'^$', views.index, name='index'),
     ]
-The **regex** here specifies the ending of the slug. The second argument passes an httpRequest object to the index view. The name kwarg makes index available as a shorter variable.
+The **regex** here specifies the ending of the slug. The second argument passes an httpRequest object to the index view. The name kwarg makes index available as a shorter variable. This will be useful when referencing URLs within templates.
 
 Back in the project's `urls.py`, `admin.site.urls` is used to access the admin console app.
 
@@ -192,7 +190,7 @@ create and save a row to the `Question` table:
 
 `q.save()`
 
-Check fields pythonically e.g. `q.id`, `q.question_text`, `q.pub_date`.
+Check fields Pythonically e.g. `q.id`, `q.question_text`, `q.pub_date`.
 
 `Question.objects.all()` gives the `__str__` representation of the existing question.
 
@@ -255,3 +253,165 @@ The question objects are unavailable. Enable them by adding the following to `po
     admin.site.register(Question)
 
 You can drill down and modify any existing db rows through the admin panel.
+
+## <a name="part3"></a>  Part 3
+
+### views with additional arguments
+
+Update `polls/views.py`:
+
+    def detail(request, question_id):
+        return HttpResponse("You're looking at question %s." % question_id)
+
+    def results(request, question_id):
+        response = "You're looking at the results of question %s."
+        return HttpResponse(response % question_id)
+
+    def vote(request, question_id):
+        return HttpResponse("You're voting on question %s." % question_id)
+
+Then connect the new views to the app in the URLconf file, `polls/urls.py`
+
+    from django.conf.urls import url
+
+    from . import views
+
+    urlpatterns = [
+        # ex: /polls/
+        url(r'^$', views.index, name='index'),
+        # ex: /polls/5/
+        url(r'^(?P<question_id>[0-9]+)/$', views.detail, name='detail'),
+        # ex: /polls/5/results/
+        url(r'^(?P<question_id>[0-9]+)/results/$', views.results, name='results'),
+        # ex: /polls/5/vote/
+        url(r'^(?P<question_id>[0-9]+)/vote/$', views.vote, name='vote'),
+    ]
+
+Start the site locally and navigate to `/polls/34` as well as `/polls/34/results` and `/polls/34/vote` to see how the pages are constructed out of the views.
+
+1. When seeking a url's view, Django first checks the project's URLconf file to find the app, passing the remainder of the URL along.
+2. That remainder goes to the app's URLconf file to continue to parse the URL.
+3. When a match is found, Django looks for a view with the same name as the `urlpattern`.
+4. The HttpRequest and any additional arguments are passed to the view.
+
+### [templates](https://docs.djangoproject.com/en/1.10/topics/templates/)
+
+Each app should have its own templates folder e.g. `mysite/polls/templates/polls`. The inner `polls` folder is used for namespacing. Otherwise, if there are templates with the same name in two different apps, Django may grab the wrong template.
+
+Add an `index.html` file at the very bottom of the new directory hierarchy containing:
+
+    {% if latest_question_list %}
+        <ul>
+        {% for question in latest_question_list %}
+            <li><a href="/polls/{{ question.id }}/">{{ question.question_text }}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No polls are available.</p>
+    {% endif %}
+
+Change `polls/views.py`. First import the template loader and the Question model:
+
+    from django.template import loader
+
+    from .models import Question
+
+
+Beneath that pass suitable args along to the `index.html` template:
+
+    def index(request):
+        latest_question_list = Question.objects.order_by('-pub_date')[:5]
+        template = loader.get_template('polls/index.html')
+        context = {
+            'latest_question_list': latest_question_list,
+        }
+        return HttpResponse(template.render(context, request))
+
+Visit `/polls` to see the result.
+
+#### the `render()` shortcut
+
+Import the function with `from django.shortcuts import render`.
+
+Rewrite the index view as follows:
+
+    def index(request):
+        latest_question_list = Question.objects.order_by('-pub_date')[:5]
+        context = {'latest_question_list': latest_question_list}
+        return render(request, 'polls/index.html', context)
+
+With `render()`, you don't need to import `HttpResponse` or the template loader. Primarily it makes the return statement more concise and Pythonic.
+
+### 404 errors
+
+Update `views.py`:
+
+    from django.http import Http404
+    from django.shortcuts import render
+
+    from .models import Question
+    # ...
+    def detail(request, question_id):
+        try:
+            question = Question.objects.get(pk=question_id)
+        except Question.DoesNotExist:
+            raise Http404("Question does not exist")
+        return render(request, 'polls/detail.html', {'question': question})
+
+The `try-except` block will ensure that if the queried object doesn't exist, we raise a 404 error.
+
+**note**: At this point there's no template, so this won't render.
+
+#### the `get_object_or_404()` shortcut
+
+Update `views.py`:
+
+    from django.shortcuts import get_object_or_404, render
+
+    from .models import Question
+    # ...
+    def detail(request, question_id):
+        question = get_object_or_404(Question, pk=question_id)
+        return render(request, 'polls/detail.html', {'question': question})
+
+This syntax replaces the `try-except` block with one concise function.
+
+`get_list_or_404()` is used for querying multiple objects with `filter()`,
+
+### template engine basics and working with urls
+
+Create `detail.html` in `/polls/templates/polls`:
+
+    <h1>{{ question.question_text }}</h1>
+    <ul>
+    {% for choice in question.choice_set.all %}
+        <li>{{ choice.choice_text }}</li>
+    {% endfor %}
+    </ul>
+
+The basics are pretty much like jinja2.
+
+
+#### removing hardcoded urls
+
+Hardcoding URLs means that if you want to make changes to URLs later you'll have to change them in multiple places.
+
+In `index.html` change from this:
+
+    <li><a href="/polls/{{ question.id }}/">{{ question.question_text }}</a></li>
+
+to this:
+
+    <li><a href="{% url 'detail' question.id %}">{{ question.question_text }}</a></li>
+
+This uses the url name assigned in `/polls/urls.py` instead of an explicit `href`.
+
+Now if the url changes, only `urls.py` needs to change
+
+#### namespacing urls
+
+Add `app_name = 'polls'` above `urlpatterns` in `polls/urls.py`.
+
+Change the `<li>` entry in `polls/templates/polls/index.html` to `<li><a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a></li>`
+
+Note the change to `polls:detail`. By creating a namespace for the app URLs we prevent conflicts with variable names for other apps in the project, much like we did for templates.

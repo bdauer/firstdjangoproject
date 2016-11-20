@@ -10,7 +10,11 @@ Table of Contents:
     * [models.py and migrations](#models)
     * [database queries](#queries)
     * [admin panel and db management](#dbadmin)
-* [Part 3](#part3) Views in Depth
+* [Part 3](#part3) Views, Templates
+    * [views with add'l args](#moreviews)
+    * [templates](#templates)
+    * [404 errors](#404)
+    * [the template engine and working with URLs](#tempeng)
 
 
 ## <a name="part1"></a> [part 1: creating a project, views, url redirects, http request/response](https://docs.djangoproject.com/en/1.10/intro/tutorial01/)
@@ -256,7 +260,7 @@ You can drill down and modify any existing db rows through the admin panel.
 
 ## <a name="part3"></a>  Part 3
 
-### views with additional arguments
+### <a name="moreviews"></a> views with additional arguments
 
 Update `polls/views.py`:
 
@@ -294,7 +298,7 @@ Start the site locally and navigate to `/polls/34` as well as `/polls/34/results
 3. When a match is found, Django looks for a view with the same name as the `urlpattern`.
 4. The HttpRequest and any additional arguments are passed to the view.
 
-### [templates](https://docs.djangoproject.com/en/1.10/topics/templates/)
+### <a name="templates"></a> [templates](https://docs.djangoproject.com/en/1.10/topics/templates/)
 
 Each app should have its own templates folder e.g. `mysite/polls/templates/polls`. The inner `polls` folder is used for namespacing. Otherwise, if there are templates with the same name in two different apps, Django may grab the wrong template.
 
@@ -342,7 +346,7 @@ Rewrite the index view as follows:
 
 With `render()`, you don't need to import `HttpResponse` or the template loader. Primarily it makes the return statement more concise and Pythonic.
 
-### 404 errors
+### <a name="404"></a> 404 errors
 
 Update `views.py`:
 
@@ -378,7 +382,7 @@ This syntax replaces the `try-except` block with one concise function.
 
 `get_list_or_404()` is used for querying multiple objects with `filter()`,
 
-### template engine basics and working with urls
+### <a name="tempeng"></a> template engine basics and working with urls
 
 Create `detail.html` in `/polls/templates/polls`:
 

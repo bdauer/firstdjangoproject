@@ -1,14 +1,22 @@
 Table of Contents:
 
-* [Part 1](#part1)
+* [Part 1](#part1): Intro and Overview
+    * [creating a project](#create)
+    * [manage.py](#manage)
+    * [views.py](#views)
+    * [urls.py](#urls)
 
-* [Part 2](#part2)
+* [Part 2](#part2): Databases
+    * [settings.py and db setup](#settings)
+    * [models.py and migrations](#models)
+    * [database queries](#queries)
+    * [admin panel and db management](#dbadmin)
 
 
 
 ## <a name="part1"></a> [part 1: creating a project, views, url redirects, http request/response](https://docs.djangoproject.com/en/1.10/intro/tutorial01/)
 
-### creating a project
+### <a name="create"></a> creating a project
 
     django-admin startproject mysite
 
@@ -25,7 +33,7 @@ creates a directory tree for the **project**:
             wsgi.py
 
 
-### [`manage.py`](https://docs.djangoproject.com/en/1.10/ref/django-admin/)
+### <a name="manage"></a>  [`manage.py`](https://docs.djangoproject.com/en/1.10/ref/django-admin/)
 
 use `manage.py` to manage your project (and its database):
 
@@ -37,7 +45,7 @@ use `manage.py` to manage your project (and its database):
 
         python manage.py startapp polls
 
-### `views.py`
+### <a name="views"></a> `views.py`
 
 Views for each app are stored **in the app's** `views.py` file. To allow views to respond to a request:
 
@@ -48,7 +56,7 @@ then **pass the request object** to the view and return a response:
     def index(request):
         return HttpResponse("Hello, world. You're at the polls index.")
 
-### `urls.py`: the URLconf module
+### <a name="urls"></a> `urls.py`: the URLconf module
 
 URL redirects live in the **project** directory's `urls.py`:
 
@@ -82,7 +90,7 @@ Back in the project's `urls.py`, `admin.site.urls` is used to access the admin c
 
 ## <a name="part2"></a> [part 2: database setup, intro to models, intro to admin panel](https://docs.djangoproject.com/en/1.10/intro/tutorial02/)
 
-### `settings.py` and db setup
+### <a name="settings"></a> `settings.py` and db setup
 
 `settings.py` stores all the config info.
 
@@ -94,7 +102,7 @@ In the `DATABASES` dictionary, if using **sqlite3** don't change anything. Other
 
 Create tables in the database for the existing apps with `python manage.py migrate`. It reads from `settings.py -> INSTALLED_APPS`.
 
-### models and migrations
+### <a name="models"></a> `models.py` and migrations
 
 
 #### 1. **make a model**
@@ -162,7 +170,7 @@ Create the tables with `migrate`:  `python manage.py migrate`
 
 This is like committing the files from staging in git.
 
-### [interact with the db](https://docs.djangoproject.com/en/1.10/topics/db/queries/)
+### <a name="queries"></a> [Database Queries](https://docs.djangoproject.com/en/1.10/topics/db/queries/)
 
 Open the interactive shell with `python manage.py shell`.
 
@@ -230,7 +238,7 @@ delete a set of objects:
 
     c.delete()
 
-### admin panel: intro and database mgmt
+### <a name="dbadmin"></a> admin panel: intro and database mgmt
 
 Create a super user: `python manage.py createsuperuser`
 

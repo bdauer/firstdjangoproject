@@ -509,3 +509,72 @@ Add a results template as `polls/templates/polls/results.html`
 See the result at `http://127.0.0.1:8000/polls/1/`.
 
 **Caution**: If two users vote at the same time that will cause a race condition. See [race conditions](https://docs.djangoproject.com/en/1.10/ref/models/expressions/#avoiding-race-conditions-using-f) for how to prevent this. (briefly: use the `F()` function to make changes in the database without involving python)
+
+### <a name="genviews"></a> generic views
+
+Use generic views to abstract common patterns. They're like abstract base classes or interfaces.
+
+**Note**: to compare before and after, refer to [this commit](https://github.com/bdauer/firstdjangoproject/tree/bc45eef2a3c0ca179a6e9219f8f94dc00ccc0447) made just before the changes below.
+
+To convert the polls app:
+
+#### 1. Convert `polls/urls.py`
+
+Amend `polls/urls.py`:
+
+    from django.conf.urls import url
+
+    from . import views
+
+    app_name = 'polls'
+    urlpatterns = [
+        url(r'^$', views.IndexView.as_view(), name='index'),
+        url(r'^(?P<pk>[0-9]+)/$', views.DetailView.as_view(), name='detail'),
+        url(r'^(?P<pk>[0-9]+)/results/$', views.ResultsView.as_view(), name='results'),
+        url(r'^(?P<question_id>[0-9]+)/vote/$', views.vote, name='vote'),
+    ]
+
+#### Replace redundant views in `polls/views.py`
+
+replace `index`, `detail`, `results` and inherit from generics.
+
+    from django.shortcuts import get_object_or_404, render
+    from django.http import HttpResponseRedirect
+    from django.urls import reverse
+    from django.views import generic
+
+    from .models import Choice, Question
+
+
+    class IndexView(generic.ListView):
+        template_name = 'polls/index.html'
+        context_object_name = 'latest_question_list'
+
+        def get_queryset(self):
+            """Return the last five published questions."""
+            return Question.objects.order_by('-pub_date')[:5]
+
+
+    class DetailView(generic.DetailView):
+        model = Question
+        template_name = 'polls/detail.html'
+
+
+    class ResultsView(generic.DetailView):
+        model = Question
+        template_name = 'polls/results.html'
+
+
+    def vote(request, question_id):
+        ... # same as above, no changes needed.
+
+
+#### Explanation
+
+We're using two most common generic views for displaying data (DetailView and ListView). More info [here](https://docs.djangoproject.com/en/1.10/ref/class-based-views/generic-display/)
+
+* The `model` attribute says which model the view should use.
+* Use `pk` for the primary key value in `urls.py` with `DetailView`, not `id`.
+* By default, generics look for templates as `<app name>/<model name>_<generic name>.html`. `template_name` overrides the default behavior.
+* When a model is provided, generics will automatically provide context objects for the template based on the model attributes.
+* In the absence of a model, use `context_object_name` to override default variable names. e.g. `ListView` will generate `<object>_list` by default, but we want a context object named `latest_<object>_list`.

@@ -14,3 +14,4 @@ Notable differences:
 * Explanations have been removed, reworded, or shortened.
 * I draw occasional parallels to flask or peewee ORM.
 * In a few places where code went through multiple iterations it has been combined.
+* I include a link to my commit before adding generic views to help see the changes made.

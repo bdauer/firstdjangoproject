@@ -827,4 +827,27 @@ Other options:
 * [coverage.py](https://docs.djangoproject.com/en/1.10/topics/testing/advanced/#topics-testing-code-coverage)
 * [more on testing in django](https://docs.djangoproject.com/en/1.10/topics/testing/)
 
-## <a name="part6"></a> Static Files
+## <a name="part6"></a> Part 6: Static Files
+
+Similar to templates, static files can exist for each app, and should be namespaced like the following: `/polls/static/polls/style.css`. Update the file with:
+
+    li a {
+        color: green;
+    }
+
+Add the following to the top of `polls/templates/polls/index.html`:
+
+    {% load static %}
+
+    <link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}" />
+
+If you were to add a static image to `polls/static/polls/images` named `background.gif`, you could load it with the following in `style.css`:
+
+    body {
+        background: white url("images/background.gif") no-repeat right bottom;
+    }
+
+more:
+    * [staticfiles how-to](https://docs.djangoproject.com/en/1.10/howto/static-files/)
+    * [staticfiles reference](https://docs.djangoproject.com/en/1.10/ref/contrib/staticfiles/)
+    * [deploying static files](https://docs.djangoproject.com/en/1.10/howto/static-files/deployment/)

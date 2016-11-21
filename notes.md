@@ -18,7 +18,13 @@ Table of Contents:
 * [Part 4](#part4) Forms and Generic Views
     * [forms](#forms)
     * [generic views](#genviews)
-
+* [Part 5](#part5): Testing
+    * [unit testing](#firstbug)
+    * [test client, integration testing, add'l workflow examples](#testclient)
+    * [additional considerations/resources](#testconsid)
+* [Part 6](#part6): Static Files
+* [Part 7](#part7): Admin
+* [Part 8](#part8): Writing Reusable Apps
 
 ## <a name="part1"></a> [part 1: creating a project, views, url redirects, http request/response](https://docs.djangoproject.com/en/1.10/intro/tutorial01/)
 
@@ -581,7 +587,7 @@ We're using two most common generic views for displaying data (DetailView and Li
 
 ## <a name="part5"></a> Part 5: Testing
 
-### first bug and unit testing
+### <a name="firstbug"></a> first bug and unit testing
 
 In bash: `python manage.py shell`
 
@@ -647,9 +653,7 @@ Add more tests to `polls/tests.py` in order to cover related scenarios:
         recent_question = Question(pub_date=time)
         self.assertIs(recent_question.was_published_recently(), True)
 
-## testing `views.py`
-
-## Django test client, integration testing
+### <a name="testclient"></a> testing `views.py`, test client, integration testing
 
 The test client is used for integration testing.
 It can help us check against the way that the program will run.
@@ -676,9 +680,7 @@ from the terminal, `python manage.py shell`:
 
     response.context['latest_question_list']
 
-## improve and test a view
-
-### fix IndexView
+#### fix a view
 
 Similar to the `was_published_recently()` bug, `IndexView` in `views.py` shows polls with a future pub_date, not just currently active polls.
 
@@ -697,7 +699,7 @@ update `views.py`:
 
 `lte` is used to return a set of objects that are less than or equal to its value.
 
-### test IndexView
+#### test the fix
 
 Automated test based on previous shell session, goes in `polls/tests.py`:
 
@@ -808,7 +810,7 @@ And add related tests to `polls/tests.py`:
 
 If this were a real project, we'd do the same with a `get_queryset` in `ResultsView` and create tests for there as well.
 
-### Summary and considerations
+### <a name="testconsid"></a> summary and considerations
 
 other things to think about:
 * test for questions with no choices. Fix the query in `polls/views.py` to exclude them.
@@ -824,3 +826,5 @@ Other options:
 * [continuous integration](https://en.wikipedia.org/wiki/Continuous_integration)
 * [coverage.py](https://docs.djangoproject.com/en/1.10/topics/testing/advanced/#topics-testing-code-coverage)
 * [more on testing in django](https://docs.djangoproject.com/en/1.10/topics/testing/)
+
+## <a name="part6"></a> Static Files

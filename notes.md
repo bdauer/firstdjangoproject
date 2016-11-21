@@ -851,3 +851,110 @@ more:
     * [staticfiles how-to](https://docs.djangoproject.com/en/1.10/howto/static-files/)
     * [staticfiles reference](https://docs.djangoproject.com/en/1.10/ref/contrib/staticfiles/)
     * [deploying static files](https://docs.djangoproject.com/en/1.10/howto/static-files/deployment/)
+
+## <a name="part7"></a> Part 7: Admin Site
+
+### ordering and grouping admin form fields
+
+Use the following pattern whenever changing admin panel:
+
+Update `polls/admin.py` to change ordering for Question fields:
+
+    from django.contrib import admin
+
+    from .models import Question
+
+
+    class QuestionAdmin(admin.ModelAdmin):
+        fields = ['pub_date', 'question_text']
+
+    admin.site.register(Question, QuestionAdmin)
+
+To group into fieldsets (like grouping in an html form, use:
+
+    class QuestionAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None,               {'fields': ['question_text']}),
+        ('Date information', {'fields': ['pub_date']}),
+    ]
+
+    admin.site.register(Question, QuestionAdmin)
+
+The first arg is the name of the set. The second is a list of fields.
+
+### child models in the admin site.
+
+#### naive method
+
+Import Choice into `polls/admin.py`:
+
+    from django.contrib import admin
+
+    from .models import Choice, Question
+    # ...
+    admin.site.register(Choice)
+
+On the site, choice will allow you  to select an existing question or add a new question. This is because of the foreign key.
+
+#### preferred approach -- nesting in the parent's panel
+
+    from django.contrib import admin
+
+    from .models import Choice, Question
+
+
+    class ChoiceInline(admin.StackedInline):
+        model = Choice
+        extra = 3
+
+
+    class QuestionAdmin(admin.ModelAdmin):
+        fieldsets = [
+            (None,               {'fields': ['question_text']}),
+            ('Date information', {'fields': ['pub_date'], 'classes': ['collapse']}),
+        ]
+        inlines = [ChoiceInline]
+
+    admin.site.register(Question, QuestionAdmin)
+
+Three choice fields included by default as specified by `extra`. Note the inclusion of `ChoiceInLine`. `StackedInline` displays the three choices with their options spread out. Alternatively use `TabularInLine` for a more compact table.
+
+### overriding default display (class instances and functions).
+
+The default display for the admin site uses `str()` for each object.
+
+To override class instances, set the `list_display` variable e.g.:
+
+    list_display = ('question_text', 'pub_date', 'was_published_recently')
+
+To override functions, in this case `was_published_recently`, modify `polls/models.py`:
+
+    class Question(models.Model):
+        # ...
+        def was_published_recently(self):
+            now = timezone.now()
+            return now - datetime.timedelta(days=1) <= self.pub_date <= now
+        was_published_recently.admin_order_field = 'pub_date'
+        was_published_recently.boolean = True
+        was_published_recently.short_description = 'Published recently?'
+
+### filter, search
+
+Add `list_filter = ['pub_date']` to `admin.py` in order to include a filter by publication date. Django will use a filter that matches the type of field (e.g. DateTimeField).
+
+Add `search_fields = ['question_text']` to `admin.py` to include a search box.
+
+### customize admin templates
+
+Update `mysite/settings.py` by adding the following to `TEMPLATES`:
+
+`'DIRS': [os.path.join(BASE_DIR, 'templates')],`
+
+to set the directory to check for project templates.
+
+make a new directory `mysite/templates/admin` and add `base_site.html` from `django/contrib/admin/templates`
+
+Replace `{{ site_header|default:_('Django administration') }} ` with a custom name.
+
+**note**: better practice is to use site_header, not replace the whole thing.
+**note**: also better practice to modify templates within each app's templates directory, not at the project level.
